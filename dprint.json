@@ -1,0 +1,21 @@
+{
+  "typescript": {
+    "arrowFunction.useParentheses": "force",
+    "binaryExpression.operatorPosition": "sameLine",
+    "lineWidth": 120,
+    "quoteProps": "asNeeded",
+    "quoteStyle": "alwaysSingle",
+    "semiColons": "always",
+    "trailingCommas": "onlyMultiLine"
+  },
+  "excludes": [
+    "**/*-lock.json",
+    "**/.DS_Store/",
+    "**/node_modules/",
+    ".direnv/"
+  ],
+  "plugins": [
+    "https://plugins.dprint.dev/typescript-0.89.3.wasm",
+    "https://plugins.dprint.dev/json-0.19.1.wasm"
+  ]
+}

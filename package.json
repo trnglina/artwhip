@@ -1,0 +1,19 @@
+{
+  "name": "artwhip",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/eslint__js": "^8.42.3",
+    "bun-types": "latest",
+    "eslint": "^9.0.0",
+    "eslint-plugin-jsdoc": "^48.2.3",
+    "typescript-eslint": "^7.6.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "drizzle-orm": "^0.30.7"
+  }
+}
