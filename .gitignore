@@ -178,4 +178,4 @@ dist
 .direnv
 
 # Database
-data.db
+dev.db

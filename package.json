@@ -1,10 +1,19 @@
 {
   "name": "artwhip",
-  "module": "index.ts",
+  "module": "src/index.ts",
   "type": "module",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "db:gen-migrations": "drizzle-kit generate:sqlite --schema src/schema.ts --out=migrations",
+    "db:migrate": "bun run src/migrate.ts",
+    "db:up": "bun db:gen-migrations && bun db:migrate",
+    "db:down": "rm $DB_PATH",
+    "db:reset": "bun db:down && bun db:up"
+  },
   "devDependencies": {
     "@types/eslint__js": "^8.42.3",
     "bun-types": "latest",
+    "drizzle-kit": "^0.20.14",
     "eslint": "^9.0.0",
     "eslint-plugin-jsdoc": "^48.2.3",
     "typescript-eslint": "^7.6.0"
@@ -13,7 +22,11 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "chrono-node": "^2.7.5",
+    "date-fns": "^3.6.0",
     "discord.js": "^14.14.1",
-    "drizzle-orm": "^0.30.7"
+    "drizzle-orm": "^0.30.7",
+    "set-interval-async": "^3.0.3",
+    "zod": "^3.22.4"
   }
 }

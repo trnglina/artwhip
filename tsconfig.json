@@ -24,6 +24,7 @@
     "checkJs": true,
     "types": [
       "bun-types"
-    ]
+    ],
+    "baseUrl": "./src"
   }
 }

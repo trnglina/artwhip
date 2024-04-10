@@ -22,6 +22,7 @@
           buildInputs = with pkgs; [
             dprint
             bun
+            nodejs_21
           ];
         };
       });
