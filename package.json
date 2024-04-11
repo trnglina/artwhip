@@ -3,7 +3,7 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "run": "bun run src/index.ts",
+    "start": "bun run src/index.ts",
     "db:gen-migrations": "drizzle-kit generate:sqlite --schema src/schema.ts --out=migrations",
     "db:migrate": "bun run src/migrate.ts",
     "db:up": "bun db:gen-migrations && bun db:migrate",

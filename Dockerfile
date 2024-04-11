@@ -3,5 +3,5 @@ WORKDIR /app
 COPY . .
 RUN bun install
  
-CMD ["bun", "run"]
+CMD ["bun", "start"]
 
