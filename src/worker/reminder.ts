@@ -26,4 +26,4 @@ setIntervalAsync(async () => {
   }
 
   previous = now;
-}, 10_000);
+}, 60 * 1000);
