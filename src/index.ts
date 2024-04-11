@@ -1,8 +1,8 @@
 import { getCommandExecute, getCommands } from 'command';
 import { Events, Routes } from 'discord.js';
 import client from 'lib/client';
-import { createShare } from 'lib/model/share';
 import { getEnrollment } from 'lib/service/enrollment';
+import { createShare } from 'lib/service/share';
 
 new Worker(new URL('worker/reminder.ts', import.meta.url).href, { ref: false });
 

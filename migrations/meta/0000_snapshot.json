@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "0190a005-7a9d-4393-9bd6-e29f93aed131",
+  "id": "710c210e-e123-4537-8ad3-5136041c3f44",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "enrollments": {
@@ -21,16 +21,23 @@
           "notNull": true,
           "autoincrement": false
         },
-        "reminder_channel_id": {
-          "name": "reminder_channel_id",
+        "channel_id": {
+          "name": "channel_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "deadline": {
-          "name": "deadline",
-          "type": "text",
+        "starting_at": {
+          "name": "starting_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "interval_hours": {
+          "name": "interval_hours",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -49,8 +56,8 @@
       },
       "uniqueConstraints": {}
     },
-    "fired_reminders": {
-      "name": "fired_reminders",
+    "reminders": {
+      "name": "reminders",
       "columns": {
         "id": {
           "name": "id",
@@ -73,19 +80,26 @@
           "notNull": true,
           "autoincrement": false
         },
-        "fired_at": {
-          "name": "fired_at",
-          "type": "text",
+        "remind_at": {
+          "name": "remind_at",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "fired": {
+          "name": "fired",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "fired_reminders_guild_id_user_id_enrollments_guild_id_user_id_fk": {
-          "name": "fired_reminders_guild_id_user_id_enrollments_guild_id_user_id_fk",
-          "tableFrom": "fired_reminders",
+        "reminders_guild_id_user_id_enrollments_guild_id_user_id_fk": {
+          "name": "reminders_guild_id_user_id_enrollments_guild_id_user_id_fk",
+          "tableFrom": "reminders",
           "tableTo": "enrollments",
           "columnsFrom": [
             "guild_id",
@@ -128,7 +142,7 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "text",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

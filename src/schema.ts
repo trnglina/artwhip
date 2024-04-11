@@ -3,19 +3,21 @@ import { foreignKey, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/
 export const enrollments = sqliteTable('enrollments', {
   guildId: text('guild_id').notNull(),
   userId: text('user_id').notNull(),
-  reminderChannelId: text('reminder_channel_id').notNull(),
-  deadline: text('deadline').notNull(),
+  channelId: text('channel_id').notNull(),
+  startingAt: integer('starting_at').notNull(),
+  intervalHours: integer('interval_hours').notNull(),
 }, (table) => {
   return {
     pk: primaryKey({ columns: [table.guildId, table.userId] }),
   };
 });
 
-export const firedReminders = sqliteTable('fired_reminders', {
+export const reminders = sqliteTable('reminders', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   guildId: text('guild_id').notNull(),
   userId: text('user_id').notNull(),
-  firedAt: text('fired_at').notNull(),
+  remindAt: integer('remind_at').notNull(),
+  startAt: integer('fired'),
 }, (table) => {
   return {
     enrollment: foreignKey({
@@ -29,7 +31,7 @@ export const shares = sqliteTable('shares', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   guildId: text('guild_id').notNull(),
   userId: text('user_id').notNull(),
-  createdAt: text('created_at').notNull(),
+  createdAt: integer('created_at').notNull(),
 }, (table) => {
   return {
     enrollment: foreignKey({

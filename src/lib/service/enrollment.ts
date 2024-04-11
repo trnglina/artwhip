@@ -1,7 +1,7 @@
-import { format, formatISO, parseISO } from 'date-fns';
-import { and, desc, eq } from 'drizzle-orm';
+import * as chrono from 'chrono-node';
+import { add, formatISO } from 'date-fns';
+import { and, eq, isNull } from 'drizzle-orm';
 import db from 'lib/db';
-import { makeCanonicalTime, parseCanonicalTime } from 'lib/model/canonical-time';
 import type Enrollment from 'lib/model/enrollment';
 import * as schema from 'schema';
 
@@ -22,71 +22,52 @@ export const getEnrollment = async (guildId: string, userId: string): Promise<En
 export const createEnrollment = async (
   guildId: string,
   userId: string,
-  reminderChannelId: string,
-  time: string | null,
-): Promise<string> => {
+  channelId: string,
+  maybeStartingTime: string | null,
+  maybeIntervalHours: number | null,
+): Promise<[Date, number]> => {
   const now = new Date();
-  const deadline = makeCanonicalTime(time, now);
-  console.info(`Enrolling ${userId} in ${guildId} with deadline at ${deadline}`);
+  const intervalHours = maybeIntervalHours ?? 24;
 
-  await db.insert(schema.enrollments).values([{
-    guildId,
-    userId,
-    reminderChannelId,
-    deadline,
-  }]).onConflictDoUpdate({
-    target: [schema.enrollments.guildId, schema.enrollments.userId],
-    set: { reminderChannelId, deadline },
+  const startingAt = (() => {
+    const fallback = add(now, { hours: intervalHours });
+    if (maybeStartingTime === null) return fallback;
+    const parsed = chrono.parseDate(maybeStartingTime, now);
+    if (parsed === null) return fallback;
+    if (parsed.getTime() < now.getTime()) return fallback;
+    return parsed;
+  })();
+
+  console.info(`Enrolling ${guildId}/${userId} from ${formatISO(startingAt)} every ${intervalHours} hour(s)`);
+
+  await db.transaction(async (tx) => {
+    await tx.insert(schema.enrollments).values([{
+      guildId,
+      userId,
+      channelId,
+      startingAt: startingAt.getTime(),
+      intervalHours,
+    }]).onConflictDoUpdate({
+      target: [schema.enrollments.guildId, schema.enrollments.userId],
+      set: { channelId, startingAt: startingAt.getTime(), intervalHours },
+    });
+
+    // Remove all existing unfired reminders for the current enrollment.
+    await tx.delete(schema.reminders).where(and(
+      eq(schema.reminders.guildId, guildId),
+      eq(schema.reminders.userId, userId),
+      isNull(schema.reminders.startAt),
+    ));
+
+    // Schedule reminder for the current enrollment.
+    console.debug(`Scheduling reminder for ${guildId}/${userId} at ${formatISO(startingAt)}`);
+    const remindAt = startingAt.getTime();
+    await tx.insert(schema.reminders).values([{
+      guildId,
+      userId,
+      remindAt,
+    }]);
   });
 
-  return format(parseCanonicalTime(deadline, now), 'HH:mm');
-};
-
-export const shouldFireReminder = async (
-  enrollment: Enrollment,
-  reference: Date,
-  previous: Date | null = null,
-  offsetMs: number = 0,
-): Promise<boolean> => {
-  if (!previous) return true;
-
-  const [lastFiredReminder] = await db.select().from(schema.firedReminders)
-    .where(and(
-      eq(schema.firedReminders.guildId, enrollment.guildId),
-      eq(schema.firedReminders.userId, enrollment.userId),
-    ))
-    .orderBy(desc(schema.firedReminders.firedAt)).limit(1);
-
-  const [lastShare] = await db.select().from(schema.shares)
-    .where(and(
-      eq(schema.shares.guildId, enrollment.guildId),
-      eq(schema.shares.userId, enrollment.userId),
-    ))
-    .orderBy(desc(schema.shares.createdAt)).limit(1);
-
-  const now = reference.getTime();
-  const start = previous.getTime();
-
-  const lastFiredAt = lastFiredReminder ? parseISO(lastFiredReminder.firedAt).getTime() : null;
-  const lastShareAt = lastShare ? parseISO(lastShare.createdAt).getTime() : null;
-
-  const shouldFireAt = parseCanonicalTime(enrollment.deadline, reference).getTime() + offsetMs;
-
-  const shouldFireAtInWindow = shouldFireAt > start && shouldFireAt <= now;
-  const lastFiredAtInWindow = lastFiredAt !== null ? lastFiredAt > start && lastFiredAt <= now : false;
-
-  const alreadyShared = lastShareAt !== null && lastShareAt > shouldFireAt - (24 * 60 * 60 * 1000) &&
-    lastShareAt <= now;
-
-  return !lastFiredAtInWindow && !alreadyShared && shouldFireAtInWindow;
-};
-
-export const fireReminder = async (guildId: string, userId: string, reference: Date): Promise<void> => {
-  console.info(`firing reminder for ${userId} in ${guildId} at ${formatISO(reference)}`);
-
-  await db.insert(schema.firedReminders).values([{
-    guildId,
-    userId,
-    firedAt: formatISO(reference),
-  }]);
+  return [startingAt, intervalHours];
 };
