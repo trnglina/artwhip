@@ -8,6 +8,7 @@ client.once(Events.ClientReady, (client) => {
   console.info(`Ready in reminders worker as ${client.user.tag}!`);
 });
 
+console.debug('Starting reminders worker...');
 await client.login(process.env['DISCORD_TOKEN']);
 
 let previous = new Date();

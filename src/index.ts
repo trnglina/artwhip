@@ -4,7 +4,10 @@ import client from 'lib/client';
 import { getEnrollment } from 'lib/service/enrollment';
 import { createShare } from 'lib/service/share';
 
-new Worker(new URL('worker/reminder.ts', import.meta.url).href, { ref: false });
+const remindersWorker = new Worker(new URL('worker/reminder.ts', import.meta.url).href, { ref: false });
+remindersWorker.addEventListener('open', () => {
+  console.log('Reminders worker is ready');
+});
 
 client.once(Events.ClientReady, async (client) => {
   console.info(`Ready as ${client.user.tag}!`);
